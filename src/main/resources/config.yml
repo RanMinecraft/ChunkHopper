@@ -29,3 +29,7 @@ delay: 30
 redstone: true
 # 一个区块最大红石及红石火把上限
 redstone-limit: 128
+
+# 漏斗过滤器 (支持 1.21.9+)
+# 漏斗周围放展示架允许让此漏斗只允许展示物品
+hopper-filter: false

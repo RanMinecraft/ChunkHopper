@@ -1,6 +1,8 @@
 package cc.ranmc.hopper.listener;
 
 import cc.ranmc.hopper.Main;
+import cc.ranmc.hopper.utils.FilterUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -15,9 +17,13 @@ import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.inventory.InventoryPickupItemEvent;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.player.PlayerInteractEvent;
 
 import java.io.IOException;
 import java.util.Objects;
+import java.util.Set;
 
 import static cc.ranmc.hopper.Main.PREFIX;
 import static cc.ranmc.hopper.utils.BasicUtil.color;
@@ -28,6 +34,22 @@ import static cc.ranmc.hopper.utils.HopperUtil.hopper;
 public class MainListener implements Listener {
 
     private static final Main plugin = Main.getInstance();
+
+    @EventHandler
+    public void onPlayerInteractEvent(PlayerInteractEvent event) {
+        FilterUtil.check(event.getClickedBlock());
+    }
+
+    @EventHandler
+    public void onInventoryPickupItemEvent(InventoryPickupItemEvent event) {
+        if (event.getInventory().getType() != InventoryType.HOPPER) return;
+        Location location = event.getInventory().getLocation();
+        if (location == null) return;
+        Block hopper = location.getBlock();
+        Set<Material> list = FilterUtil.getFilterItems(hopper);
+        if (list.isEmpty()) return;
+        if (!list.contains(event.getItem().getItemStack().getType())) event.setCancelled(true);
+    }
 
     @EventHandler
     public void onBlockExplodeEvent(BlockExplodeEvent event) {
@@ -158,6 +180,7 @@ public class MainListener implements Listener {
     private void onBlockBreakEvent(BlockBreakEvent event) {
         if (!plugin.isEnable() && event.isCancelled()) return;
         Block block = event.getBlock();
+        FilterUtil.check(event.getBlock());
         if (plugin.getConfig().getBoolean("block", true)) {
             hopper(block.getLocation());
         }
