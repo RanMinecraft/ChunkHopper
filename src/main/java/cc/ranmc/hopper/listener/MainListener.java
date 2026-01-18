@@ -139,9 +139,14 @@ public class MainListener implements Listener {
                 }
                 if (plugin.getDataYml().getString(key) != null) {
                     String[] xyz = Objects.requireNonNull(plugin.getDataYml().getString(key)).split("x");
-                    player.sendMessage(PREFIX + color("&c该区块已存在区块漏斗 x" + xyz[0] + " y" + xyz[1] + " z" + xyz[2]));
-                    event.setCancelled(true);
-                    return;
+                    Block testBlock = block.getWorld().getBlockAt(Integer.parseInt(xyz[0]),
+                            Integer.parseInt(xyz[1]),
+                            Integer.parseInt(xyz[2]));
+                    if (testBlock.getType() == Material.HOPPER) {
+                        player.sendMessage(PREFIX + color("&c该区块已存在区块漏斗 x" + xyz[0] + " y" + xyz[1] + " z" + xyz[2]));
+                        event.setCancelled(true);
+                        return;
+                    }
                 }
                 player.sendMessage(PREFIX + color("&a你放置了一个区块漏斗"));
                 StringBuilder xyz = new StringBuilder();
