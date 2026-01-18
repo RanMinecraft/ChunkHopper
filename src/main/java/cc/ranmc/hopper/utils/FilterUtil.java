@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static cc.ranmc.hopper.utils.TickUtil.tickFolia;
+
 public class FilterUtil {
     private static final Map<Location, Set<Material>> filterMap = new ConcurrentHashMap<>();
 
@@ -30,7 +32,13 @@ public class FilterUtil {
         if (!(block.getState().getBlockData() instanceof Directional directional)) return;
         Block attachedBlock = block.getRelative(directional.getFacing().getOppositeFace());
         if (attachedBlock.getType() != Material.HOPPER) return;
-        Bukkit.getScheduler().runTaskLater(Main.getInstance(), ()-> FilterUtil.update(attachedBlock), 2);
+        if (BasicUtil.isFolia()) {
+            Bukkit.getServer().getRegionScheduler().runDelayed(Main.getInstance(), block.getLocation(), task ->
+                    FilterUtil.update(attachedBlock), 2);
+        } else {
+            Bukkit.getScheduler().runTaskLater(Main.getInstance(), ()->
+                    FilterUtil.update(attachedBlock), 2);
+        }
     }
 
     public static Set<Material> update(Block hopper) {
