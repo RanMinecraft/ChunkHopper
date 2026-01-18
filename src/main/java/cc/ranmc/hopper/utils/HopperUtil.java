@@ -82,50 +82,51 @@ public class HopperUtil {
      * 储存掉落物
      */
     public static void hopper(Location location) {
-        location.getWorld().getChunkAtAsync(location).thenAccept(chunk -> {
-            String name = location.getWorld().getName() + chunk.getX() + "x" + chunk.getZ();
-            if (plugin.getLockList().contains(name)) {
-                return;
-            } else {
-                plugin.getLockList().add(name);
-            }
-            hopperAddItem(location, chunk, name);
-        });
+        Chunk chunk = location.getChunk();
+        String name = location.getWorld().getName() + chunk.getX() + "x" + chunk.getZ();
+        if (plugin.getLockList().contains(name)) {
+            return;
+        } else {
+            plugin.getLockList().add(name);
+        }
+        hopperAddItem(location, name);
     }
 
     /**
      * 添加物品到区块漏斗
      */
-    private static void hopperAddItem(Location location, Chunk chunk, String name) {
-        plugin.getLockList().remove(name);
-        if (!plugin.isEnable() || !chunk.isLoaded() || plugin.getDataYml().getString(name) == null) return;
-        Entity[] entities = chunk.getEntities();
-        String[] xyz = Objects.requireNonNull(plugin.getDataYml().getString(name)).split("x");
-        Block block = location.getWorld().getBlockAt(Integer.parseInt(xyz[0]),
-                Integer.parseInt(xyz[1]),
-                Integer.parseInt(xyz[2]));
-        if (block.getType() == Material.HOPPER) {
-            Hopper hopper = (Hopper) block.getState();
-            String customName = hopper.getCustomName();
-            if (customName == null) return;
-            List<String> itemList = plugin.getChunkYml().getStringList(customName);
-            for (Entity entity : entities) {
-                if (entity.getType() == EntityType.ITEM) {
-                    Item item = (Item) entity;
-                    if (itemList.contains(item.getItemStack().getType().toString())) {
-                        Inventory inventory = hopper.getInventory();
-                        List<ItemStack> list = plugin.getItemListMap().getOrDefault(inventory, new ArrayList<>());
-                        list.add(item.getItemStack());
-                        plugin.getItemListMap().put(inventory, list);
-                        entity.remove();
+    private static void hopperAddItem(Location location, String name) {
+        location.getWorld().getChunkAtAsync(location).thenAccept(chunk -> {
+            plugin.getLockList().remove(name);
+            if (!plugin.isEnable() || !chunk.isLoaded() || plugin.getDataYml().getString(name) == null) return;
+            Entity[] entities = chunk.getEntities();
+            String[] xyz = Objects.requireNonNull(plugin.getDataYml().getString(name)).split("x");
+            Block block = location.getWorld().getBlockAt(Integer.parseInt(xyz[0]),
+                    Integer.parseInt(xyz[1]),
+                    Integer.parseInt(xyz[2]));
+            if (block.getType() == Material.HOPPER) {
+                Hopper hopper = (Hopper) block.getState();
+                String customName = hopper.getCustomName();
+                if (customName == null) return;
+                List<String> itemList = plugin.getChunkYml().getStringList(customName);
+                for (Entity entity : entities) {
+                    if (entity.getType() == EntityType.ITEM) {
+                        Item item = (Item) entity;
+                        if (itemList.contains(item.getItemStack().getType().toString())) {
+                            Inventory inventory = hopper.getInventory();
+                            List<ItemStack> list = plugin.getItemListMap().getOrDefault(inventory, new ArrayList<>());
+                            list.add(item.getItemStack());
+                            plugin.getItemListMap().put(inventory, list);
+                            entity.remove();
+                        }
                     }
                 }
+            } else {
+                plugin.getDataYml().set(name, null);
+                try {
+                    plugin.getDataYml().save(plugin.getDataFile());
+                } catch (IOException ignore) {}
             }
-        } else {
-            plugin.getDataYml().set(name, null);
-            try {
-                plugin.getDataYml().save(plugin.getDataFile());
-            } catch (IOException ignore) {}
-        }
+        });
     }
 }
