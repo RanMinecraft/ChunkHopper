@@ -22,6 +22,7 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -34,6 +35,10 @@ import static cc.ranmc.hopper.utils.HopperUtil.hopper;
 public class MainListener implements Listener {
 
     private static final Main plugin = Main.getInstance();
+    private static final List<Material> redstoneBlockList = List.of(
+            Material.REDSTONE_WIRE,
+            Material.REDSTONE_TORCH,
+            Material.REPEATER);
 
     @EventHandler
     public void onPlayerInteractEvent(PlayerInteractEvent event) {
@@ -108,7 +113,7 @@ public class MainListener implements Listener {
         Player player = event.getPlayer();
         String chunkKey = getKey(block.getChunk());
         if (plugin.getConfig().getBoolean("redstone", false) &&
-                block.getType() == Material.REDSTONE_WIRE) {
+                redstoneBlockList.contains(block.getType())) {
             if (plugin.getRedStoneCountMap().containsKey(chunkKey)) {
                 int count = plugin.getRedStoneCountMap().get(chunkKey);
                 int max = plugin.getConfig().getInt("redstone-limit",128);
@@ -207,9 +212,7 @@ public class MainListener implements Listener {
                 } catch (IOException ignore) {}
             }
 
-        } else if (material == Material.REDSTONE_WIRE ||
-                material == Material.REDSTONE_TORCH ||
-                material == Material.REPEATER) {
+        } else if (redstoneBlockList.contains(block.getType())) {
             String chunkKey = getKey(block.getChunk());
             if (plugin.getRedStoneCountMap().containsKey(chunkKey)) {
                 plugin.getRedStoneCountMap().put(chunkKey,
