@@ -117,13 +117,12 @@ public class MainListener implements Listener {
             if (plugin.getRedStoneCountMap().containsKey(chunkKey)) {
                 int count = plugin.getRedStoneCountMap().get(chunkKey);
                 int max = plugin.getConfig().getInt("redstone-limit",128);
+                player.sendActionBar(color("&e该区块已经放置红石 " + count + " / " + max));
+                plugin.getRedStoneCountMap().put(chunkKey, plugin.getRedStoneCountMap().get(chunkKey) + 1);
                 if (count > max) {
                     event.setCancelled(true);
                     player.sendMessage(color("&c该区块放置红石已达上限\n为了大家游戏流畅度考虑\n请留更多性能给更多玩家"));
                     return;
-                } else {
-                    player.sendActionBar(color("&e该区块已经放置红石 " + count + " / " + max));
-                    plugin.getRedStoneCountMap().put(chunkKey, plugin.getRedStoneCountMap().get(chunkKey) + 1);
                 }
             } else {
                 player.sendMessage(color("&e该区块计算红石中请稍后\n为了大家游戏流畅度考虑\n请留更多性能给更多玩家"));
@@ -169,13 +168,12 @@ public class MainListener implements Listener {
             if (plugin.getHopperCountMap().containsKey(chunkKey)) {
                 int count = plugin.getHopperCountMap().get(chunkKey);
                 int max = plugin.getConfig().getInt("limit",32);
+                player.sendActionBar(color("&e该区块已经放置漏斗 " + count + " / " + max));
+                plugin.getHopperCountMap().put(chunkKey, plugin.getHopperCountMap().get(chunkKey) + 1);
                 if (count > max) {
                     event.setCancelled(true);
                     player.sendMessage(color("&c该区块放置漏斗已达上限\n推荐您使用区块漏斗功能\n详情查看菜单中游戏帮助"));
                     return;
-                } else {
-                    player.sendActionBar(color("&e该区块已经放置漏斗 " + count + " / " + max));
-                    plugin.getHopperCountMap().put(chunkKey, plugin.getHopperCountMap().get(chunkKey) + 1);
                 }
             } else {
                 player.sendMessage(color("&e该区块计算漏斗中请稍后\n推荐您使用区块漏斗功能\n详情查看菜单中游戏帮助"));
