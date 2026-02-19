@@ -20,12 +20,14 @@ disable-world:
   - world_nether
   - world_the_end
 
+# 限制漏斗放置最大数量
+chunk: true
 # 一个区块最大漏斗上限
 limit: 32
 # 在一个方块被破坏多久之后检测
 delay: 30
 
-# 限制红石及红石火把最大数量
+# 限制红石及红石火把放置最大数量
 redstone: true
 # 一个区块最大红石及红石火把上限
 redstone-limit: 128

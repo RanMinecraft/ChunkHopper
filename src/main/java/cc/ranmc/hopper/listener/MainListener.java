@@ -165,21 +165,23 @@ public class MainListener implements Listener {
                     plugin.getDataYml().save(plugin.getDataFile());
                 } catch (IOException ignored) {}
             }
-            if (plugin.getHopperCountMap().containsKey(chunkKey)) {
-                int count = plugin.getHopperCountMap().get(chunkKey);
-                int max = plugin.getConfig().getInt("limit",32);
-                player.sendActionBar(color("&e该区块已经放置漏斗 " + (count - (count > max ? 1 : 0)) + " / " + max));
-                if (count > max) {
+            if (plugin.getConfig().getBoolean("chunk", true)) {
+                if (plugin.getHopperCountMap().containsKey(chunkKey)) {
+                    int count = plugin.getHopperCountMap().get(chunkKey);
+                    int max = plugin.getConfig().getInt("limit", 32);
+                    player.sendActionBar(color("&e该区块已经放置漏斗 " + (count - (count > max ? 1 : 0)) + " / " + max));
+                    if (count > max) {
+                        event.setCancelled(true);
+                        player.sendMessage(color("&c该区块放置漏斗已达上限\n推荐您使用区块漏斗功能\n详情查看菜单中游戏帮助"));
+                        return;
+                    }
+                    plugin.getHopperCountMap().put(chunkKey, plugin.getHopperCountMap().get(chunkKey) + 1);
+                } else {
+                    player.sendMessage(color("&e该区块计算漏斗中请稍后\n推荐您使用区块漏斗功能\n详情查看菜单中游戏帮助"));
                     event.setCancelled(true);
-                    player.sendMessage(color("&c该区块放置漏斗已达上限\n推荐您使用区块漏斗功能\n详情查看菜单中游戏帮助"));
+                    block.getWorld().getChunkAtAsync(block.getLocation()).thenAccept(chunk -> countBlock(block));
                     return;
                 }
-                plugin.getHopperCountMap().put(chunkKey, plugin.getHopperCountMap().get(chunkKey) + 1);
-            } else {
-                player.sendMessage(color("&e该区块计算漏斗中请稍后\n推荐您使用区块漏斗功能\n详情查看菜单中游戏帮助"));
-                event.setCancelled(true);
-                block.getWorld().getChunkAtAsync(block.getLocation()).thenAccept(chunk -> countBlock(block));
-                return;
             }
         }
     }
