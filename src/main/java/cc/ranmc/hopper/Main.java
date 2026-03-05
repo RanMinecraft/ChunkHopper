@@ -58,6 +58,8 @@ public class Main extends JavaPlugin implements Listener {
     private ScheduledTask foliaTask = null;
     @Getter
     private final Map<Inventory,List<ItemStack>> itemListMap = new ConcurrentHashMap<>();
+    @Getter
+    private final boolean folia = BasicUtil.isFolia();
 
     @Override
     public void onEnable() {
@@ -71,7 +73,7 @@ public class Main extends JavaPlugin implements Listener {
 
         ConfigUtil.reload();
 
-        if (BasicUtil.isFolia()) {
+        if (folia) {
             foliaTask = Bukkit.getServer().getGlobalRegionScheduler().runAtFixedRate(this, task -> tickFolia(), 20, 20);
         } else {
             task = Bukkit.getScheduler().runTaskTimer(this, TickUtil::tick, 20, 20);

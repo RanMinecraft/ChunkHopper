@@ -32,7 +32,7 @@ public class FilterUtil {
         if (!(block.getState().getBlockData() instanceof Directional directional)) return;
         Block attachedBlock = block.getRelative(directional.getFacing().getOppositeFace());
         if (attachedBlock.getType() != Material.HOPPER) return;
-        if (BasicUtil.isFolia()) {
+        if (Main.getInstance().isFolia()) {
             Bukkit.getServer().getRegionScheduler().runDelayed(Main.getInstance(), block.getLocation(), task ->
                     FilterUtil.update(attachedBlock), 2);
         } else {
