@@ -11,14 +11,13 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 import static cc.ranmc.hopper.Main.PREFIX;
+import static cc.ranmc.hopper.utils.BasicUtil.isInventoryFull;
 import static cc.ranmc.hopper.utils.BasicUtil.print;
 
 public class HopperUtil {
@@ -115,14 +114,15 @@ public class HopperUtil {
                 if (customName == null) return;
                 List<String> itemList = plugin.getChunkYml().getStringList(customName);
                 for (Entity entity : entities) {
-                    if (entity.getType() == EntityType.ITEM) {
-                        Item item = (Item) entity;
+                    if (entity instanceof Item item) {
                         if (itemList.contains(item.getItemStack().getType().toString())) {
                             Inventory inventory = hopper.getInventory();
-                            List<ItemStack> list = plugin.getItemListMap().getOrDefault(inventory, new ArrayList<>());
-                            list.add(item.getItemStack());
-                            plugin.getItemListMap().put(inventory, list);
-                            entity.remove();
+                            if (isInventoryFull(inventory)) {
+                                inventory.addItem(item.getItemStack());
+                                entity.remove();
+                            } else {
+                                entity.teleportAsync(hopper.getLocation().add(0, 1, 0));
+                            }
                         }
                     }
                 }

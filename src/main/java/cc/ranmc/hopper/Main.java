@@ -4,7 +4,6 @@ import cc.ranmc.hopper.command.MainCommand;
 import cc.ranmc.hopper.listener.MainListener;
 import cc.ranmc.hopper.utils.BasicUtil;
 import cc.ranmc.hopper.utils.ConfigUtil;
-import cc.ranmc.hopper.utils.TickUtil;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,8 +11,6 @@ import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.Listener;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -22,10 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static cc.ranmc.hopper.utils.BasicUtil.print;
-import static cc.ranmc.hopper.utils.TickUtil.tickFolia;
 
 public class Main extends JavaPlugin implements Listener {
 
@@ -54,10 +49,6 @@ public class Main extends JavaPlugin implements Listener {
     @Getter
     @Setter
     private int delay;
-    private BukkitTask task = null;
-    private ScheduledTask foliaTask = null;
-    @Getter
-    private final Map<Inventory,List<ItemStack>> itemListMap = new ConcurrentHashMap<>();
     @Getter
     private final boolean folia = BasicUtil.isFolia();
 
@@ -73,13 +64,6 @@ public class Main extends JavaPlugin implements Listener {
 
         ConfigUtil.reload();
 
-        if (folia) {
-            foliaTask = Bukkit.getServer().getGlobalRegionScheduler().runAtFixedRate(this,
-                    task -> tickFolia(), 20, 20);
-        } else {
-            task = Bukkit.getScheduler().runTaskTimer(this, TickUtil::tick, 20, 20);
-        }
-
         // 注册监听器
         Bukkit.getPluginManager().registerEvents(new MainListener(), this);
 
@@ -92,13 +76,5 @@ public class Main extends JavaPlugin implements Listener {
         new Metrics(this, 28105);
 
         super.onEnable();
-    }
-
-
-    @Override
-    public void onDisable() {
-        if (task != null) task.cancel();
-        if (foliaTask != null) foliaTask.cancel();
-        super.onDisable();
     }
 }
