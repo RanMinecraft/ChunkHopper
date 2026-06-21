@@ -66,7 +66,7 @@ public class Main extends JavaPlugin implements Listener {
         instance = this;
         print("&e-----------------------");
         print("&b漏斗箱子 &dBy阿然");
-        print("&b插件版本:" + getDescription().getVersion());
+        print("&b插件版本:" + getPluginMeta().getVersion());
         print("&b服务器版本:" + getServer().getVersion());
         print("&cQQ 2263055528");
         print("&e-----------------------");
