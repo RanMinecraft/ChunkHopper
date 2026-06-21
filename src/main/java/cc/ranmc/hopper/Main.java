@@ -74,7 +74,8 @@ public class Main extends JavaPlugin implements Listener {
         ConfigUtil.reload();
 
         if (folia) {
-            foliaTask = Bukkit.getServer().getGlobalRegionScheduler().runAtFixedRate(this, task -> tickFolia(), 20, 20);
+            foliaTask = Bukkit.getServer().getGlobalRegionScheduler().runAtFixedRate(this,
+                    task -> tickFolia(), 20, 20);
         } else {
             task = Bukkit.getScheduler().runTaskTimer(this, TickUtil::tick, 20, 20);
         }
