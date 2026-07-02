@@ -17,9 +17,12 @@ import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 import java.io.IOException;
 import java.util.List;
@@ -47,14 +50,31 @@ public class MainListener implements Listener {
 
     @EventHandler
     public void onInventoryPickupItemEvent(InventoryPickupItemEvent event) {
-        if (event.getInventory().getType() != InventoryType.HOPPER) return;
-        Location location = event.getInventory().getLocation();
+        Inventory inv = event.getInventory();
+        if (inv.getType() != InventoryType.HOPPER) return;
+        Location location = inv.getLocation();
         if (location == null) return;
         Block hopper = location.getBlock();
         Set<Material> list = FilterUtil.getFilterItems(hopper);
         if (list.isEmpty()) return;
         if (!list.contains(event.getItem().getItemStack().getType())) event.setCancelled(true);
     }
+
+    /*@EventHandler
+    public void onInventoryMoveItemEvent(InventoryMoveItemEvent event) {
+        Inventory inv = event.getDestination();
+        if (inv.getType() != InventoryType.HOPPER) return;
+        Location location = inv.getLocation();
+        if (location == null) return;
+        Block hopperBlock = location.getBlock();
+        Set<Material> list = FilterUtil.getFilterItems(hopperBlock);
+        if (list.isEmpty()) return;
+        ItemStack transferItem = event.getItem();
+        Material itemType = transferItem.getType();
+        if (!list.contains(itemType)) {
+            event.setCancelled(true);
+        }
+    }*/
 
     @EventHandler
     public void onBlockExplodeEvent(BlockExplodeEvent event) {
