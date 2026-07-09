@@ -6,7 +6,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.Hopper;
+import org.bukkit.block.data.type.RedstoneWallTorch;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -216,6 +218,29 @@ public class MainListener implements Listener {
         }
         Player player = event.getPlayer();
         Material material = block.getType();
+        if (!redstoneBlockList.contains(material)) {
+            // 破坏红石下面的方块（或附着红石的方块）时，同步减少计数
+            String chunkKey = getKey(block.getChunk());
+            if (plugin.getRedStoneCountMap().containsKey(chunkKey)) {
+                // 检查上方：红石线/红石火把/中继器放在方块上面
+                Block up = block.getRelative(BlockFace.UP);
+                if (redstoneBlockList.contains(up.getType())) {
+                    plugin.getRedStoneCountMap().put(chunkKey,
+                            plugin.getRedStoneCountMap().get(chunkKey) - 1);
+                }
+                // 检查四周墙壁红石火把（墙上火把有朝向，朝向这块方块说明附着在这块方块上）
+                BlockFace[] horizontal = {BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST};
+                for (BlockFace face : horizontal) {
+                    Block relative = block.getRelative(face);
+                    if (relative.getType() == Material.REDSTONE_TORCH &&
+                            relative.getBlockData() instanceof RedstoneWallTorch torchData &&
+                            torchData.getFacing().getOppositeFace() == face) {
+                        plugin.getRedStoneCountMap().put(chunkKey,
+                                plugin.getRedStoneCountMap().get(chunkKey) - 1);
+                    }
+                }
+            }
+        }
         if (material == Material.HOPPER) {
             Hopper hopper = (Hopper) block.getState();
             String chunkKey = getKey(block.getChunk());
