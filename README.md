@@ -103,8 +103,10 @@ hopper-filter: false
 
 ## 📊 数据统计
 
-[![bStats 服务器数](https://bstats.org/signatures/bukkit/28105.svg)](https://bstats.org/plugin/bukkit/ChunkHopper/28105)
+| 服务器数 | 玩家数 |
+|:---:|:---:|
+| ![Servers](https://bstats-graph.gritter.nl/v1/plugins/28105/charts/servers/chart.png?theme=dark&width=400&height=200) | ![Players](https://bstats-graph.gritter.nl/v1/plugins/28105/charts/players/chart.png?theme=dark&width=400&height=200) |
 
-## � 许可证
+## 📄 许可证
 
 本项目基于 [GNU Affero General Public License v3.0](LICENSE) 开源。
