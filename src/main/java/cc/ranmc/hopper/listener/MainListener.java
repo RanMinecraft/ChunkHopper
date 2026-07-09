@@ -43,6 +43,7 @@ public class MainListener implements Listener {
     private static final List<Material> redstoneBlockList = List.of(
             Material.REDSTONE_WIRE,
             Material.REDSTONE_TORCH,
+            Material.REDSTONE_WALL_TORCH,
             Material.REPEATER);
 
     @EventHandler
