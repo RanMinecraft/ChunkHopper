@@ -1,6 +1,8 @@
 package cc.ranmc.hopper.utils;
 
 import cc.ranmc.hopper.Main;
+import cc.ranmc.hopper.listener.MainListener;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -23,6 +25,12 @@ import static cc.ranmc.hopper.utils.BasicUtil.print;
 public class HopperUtil {
 
     private static final Main plugin = Main.getInstance();
+
+    public static final List<Material> REDSTONE_BLOCKS = List.of(
+            Material.REDSTONE_WIRE,
+            Material.REDSTONE_TORCH,
+            Material.REDSTONE_WALL_TORCH,
+            Material.REPEATER);
 
     public static String getKey(Hopper hopper) {
         return hopper.getWorld().getName() + hopper.getChunk().getX() + "x" + hopper.getChunk().getZ();
@@ -51,9 +59,7 @@ public class HopperUtil {
                     Material material = block.getChunk().getBlock(x, y, z).getType();
                     if (material == Material.HOPPER) {
                         hopper++;
-                    } else if (material == Material.REDSTONE_WIRE ||
-                            material == Material.REDSTONE_TORCH ||
-                            material == Material.REPEATER) {
+                    } else if (REDSTONE_BLOCKS.contains(material)) {
                         redStone++;
                     }
                 }

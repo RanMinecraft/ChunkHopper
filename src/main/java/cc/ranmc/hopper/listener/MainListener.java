@@ -2,7 +2,6 @@ package cc.ranmc.hopper.listener;
 
 import cc.ranmc.hopper.Main;
 import cc.ranmc.hopper.utils.FilterUtil;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -19,15 +18,11 @@ import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-
 import java.io.IOException;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -36,15 +31,11 @@ import static cc.ranmc.hopper.utils.BasicUtil.color;
 import static cc.ranmc.hopper.utils.HopperUtil.countBlock;
 import static cc.ranmc.hopper.utils.HopperUtil.getKey;
 import static cc.ranmc.hopper.utils.HopperUtil.hopper;
+import static cc.ranmc.hopper.utils.HopperUtil.REDSTONE_BLOCKS;
 
 public class MainListener implements Listener {
 
     private static final Main plugin = Main.getInstance();
-    private static final List<Material> redstoneBlockList = List.of(
-            Material.REDSTONE_WIRE,
-            Material.REDSTONE_TORCH,
-            Material.REDSTONE_WALL_TORCH,
-            Material.REPEATER);
 
     @EventHandler
     public void onPlayerInteractEvent(PlayerInteractEvent event) {
@@ -136,7 +127,7 @@ public class MainListener implements Listener {
         Player player = event.getPlayer();
         String chunkKey = getKey(block.getChunk());
         if (plugin.getConfig().getBoolean("redstone", false) &&
-                redstoneBlockList.contains(block.getType())) {
+                REDSTONE_BLOCKS.contains(block.getType())) {
             if (plugin.getRedStoneCountMap().containsKey(chunkKey)) {
                 int count = plugin.getRedStoneCountMap().get(chunkKey);
                 int max = plugin.getConfig().getInt("redstone-limit",128);
@@ -219,26 +210,37 @@ public class MainListener implements Listener {
         }
         Player player = event.getPlayer();
         Material material = block.getType();
-        if (!redstoneBlockList.contains(material)) {
+        if (!REDSTONE_BLOCKS.contains(material)) {
             // 破坏红石下面的方块（或附着红石的方块）时，同步减少计数
             String chunkKey = getKey(block.getChunk());
             if (plugin.getRedStoneCountMap().containsKey(chunkKey)) {
+                int removed = 0;
                 // 检查上方：红石线/红石火把/中继器放在方块上面
                 Block up = block.getRelative(BlockFace.UP);
-                if (redstoneBlockList.contains(up.getType())) {
-                    plugin.getRedStoneCountMap().put(chunkKey,
-                            plugin.getRedStoneCountMap().get(chunkKey) - 1);
+                if (REDSTONE_BLOCKS.contains(up.getType())) {
+                    removed++;
                 }
-                // 检查四周墙壁红石火把（墙上火把有朝向，朝向这块方块说明附着在这块方块上）
+                // 检查四周墙壁红石火把（墙上火把是 REDSTONE_WALL_TORCH，有朝向）
                 BlockFace[] horizontal = {BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST};
                 for (BlockFace face : horizontal) {
                     Block relative = block.getRelative(face);
-                    if (relative.getType() == Material.REDSTONE_TORCH &&
+                    if (relative.getType() == Material.REDSTONE_WALL_TORCH &&
                             relative.getBlockData() instanceof RedstoneWallTorch torchData &&
                             torchData.getFacing().getOppositeFace() == face) {
-                        plugin.getRedStoneCountMap().put(chunkKey,
-                                plugin.getRedStoneCountMap().get(chunkKey) - 1);
+                        removed++;
                     }
+                }
+                // 检查下方：倒挂在天花板上的红石火把
+                Block down = block.getRelative(BlockFace.DOWN);
+                if (down.getType() == Material.REDSTONE_TORCH) {
+                    removed++;
+                }
+                if (removed > 0) {
+                    plugin.getRedStoneCountMap().put(chunkKey,
+                            plugin.getRedStoneCountMap().get(chunkKey) - removed);
+                    int count = plugin.getRedStoneCountMap().get(chunkKey);
+                    int max = plugin.getConfig().getInt("redstone-limit", 128);
+                    player.sendActionBar(color("&e该区块红石数量 " + count + " / " + max));
                 }
             }
         }
@@ -258,11 +260,14 @@ public class MainListener implements Listener {
                 } catch (IOException ignore) {}
             }
 
-        } else if (redstoneBlockList.contains(block.getType())) {
+        } else if (REDSTONE_BLOCKS.contains(block.getType())) {
             String chunkKey = getKey(block.getChunk());
             if (plugin.getRedStoneCountMap().containsKey(chunkKey)) {
                 plugin.getRedStoneCountMap().put(chunkKey,
                         plugin.getRedStoneCountMap().get(chunkKey) - 1);
+                int count = plugin.getRedStoneCountMap().get(chunkKey);
+                int max = plugin.getConfig().getInt("redstone-limit", 128);
+                player.sendActionBar(color("&e该区块红石数量 " + count + " / " + max));
             }
         }
     }
