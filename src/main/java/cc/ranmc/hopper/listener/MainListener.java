@@ -236,10 +236,8 @@ public class MainListener implements Listener {
                     }
                 }
                 if (removed > 0) {
-                    int count = plugin.getRedStoneCountMap().get(chunkKey) - removed;
-                    plugin.getRedStoneCountMap().put(chunkKey, count);
-                    int max = plugin.getConfig().getInt("redstone-limit", 128);
-                    player.sendActionBar(Component.text("该区块红石数量 " + count + " / " + max, NamedTextColor.YELLOW));
+                    plugin.getRedStoneCountMap().put(chunkKey, 
+                        plugin.getRedStoneCountMap().get(chunkKey) - removed);
                 }
             }
         }
