@@ -22,6 +22,8 @@ import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.Set;
@@ -131,7 +133,7 @@ public class MainListener implements Listener {
             if (plugin.getRedStoneCountMap().containsKey(chunkKey)) {
                 int count = plugin.getRedStoneCountMap().get(chunkKey);
                 int max = plugin.getConfig().getInt("redstone-limit",128);
-                player.sendActionBar(color("&e该区块红石数量 " + (count - (count > max ? 1 : 0)) + " / " + max));
+                player.sendActionBar(Component.text("该区块红石数量 " + (count - (count > max ? 1 : 0)) + " / " + max, NamedTextColor.YELLOW));
                 if (count > max) {
                     event.setCancelled(true);
                     player.sendMessage(color("&c该区块放置红石已达上限\n为了大家游戏流畅度考虑\n请留更多性能给更多玩家"));
@@ -183,7 +185,7 @@ public class MainListener implements Listener {
                 if (plugin.getHopperCountMap().containsKey(chunkKey)) {
                     int count = plugin.getHopperCountMap().get(chunkKey);
                     int max = plugin.getConfig().getInt("limit", 32);
-                    player.sendActionBar(color("&e该区块已经放置漏斗 " + (count - (count > max ? 1 : 0)) + " / " + max));
+                    player.sendActionBar(Component.text("该区块已经放置漏斗 " + (count - (count > max ? 1 : 0)) + " / " + max, NamedTextColor.YELLOW));
                     if (count > max) {
                         event.setCancelled(true);
                         player.sendMessage(color("&c该区块放置漏斗已达上限\n推荐您使用区块漏斗功能\n详情查看菜单中游戏帮助"));
@@ -215,32 +217,29 @@ public class MainListener implements Listener {
             String chunkKey = getKey(block.getChunk());
             if (plugin.getRedStoneCountMap().containsKey(chunkKey)) {
                 int removed = 0;
-                // 检查上方：红石线/红石火把/中继器放在方块上面
+                // 检查上方：红石线/地面红石火把/中继器放在方块上面（墙上火把不会放在方块上表面）
                 Block up = block.getRelative(BlockFace.UP);
-                if (REDSTONE_BLOCKS.contains(up.getType())) {
+                Material upType = up.getType();
+                if (upType == Material.REDSTONE_WIRE ||
+                        upType == Material.REDSTONE_TORCH ||
+                        upType == Material.REPEATER) {
                     removed++;
                 }
-                // 检查四周墙壁红石火把（墙上火把是 REDSTONE_WALL_TORCH，有朝向）
+                // 检查四周墙壁红石火把（墙上火把是 REDSTONE_WALL_TORCH，火焰朝向=背离墙的方向=从B到火把的方向）
                 BlockFace[] horizontal = {BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST};
                 for (BlockFace face : horizontal) {
                     Block relative = block.getRelative(face);
                     if (relative.getType() == Material.REDSTONE_WALL_TORCH &&
                             relative.getBlockData() instanceof RedstoneWallTorch torchData &&
-                            torchData.getFacing().getOppositeFace() == face) {
+                            torchData.getFacing() == face) {
                         removed++;
                     }
                 }
-                // 检查下方：倒挂在天花板上的红石火把
-                Block down = block.getRelative(BlockFace.DOWN);
-                if (down.getType() == Material.REDSTONE_TORCH) {
-                    removed++;
-                }
                 if (removed > 0) {
-                    plugin.getRedStoneCountMap().put(chunkKey,
-                            plugin.getRedStoneCountMap().get(chunkKey) - removed);
-                    int count = plugin.getRedStoneCountMap().get(chunkKey);
+                    int count = plugin.getRedStoneCountMap().get(chunkKey) - removed;
+                    plugin.getRedStoneCountMap().put(chunkKey, count);
                     int max = plugin.getConfig().getInt("redstone-limit", 128);
-                    player.sendActionBar(color("&e该区块红石数量 " + count + " / " + max));
+                    player.sendActionBar(Component.text("该区块红石数量 " + count + " / " + max, NamedTextColor.YELLOW));
                 }
             }
         }
@@ -267,7 +266,7 @@ public class MainListener implements Listener {
                         plugin.getRedStoneCountMap().get(chunkKey) - 1);
                 int count = plugin.getRedStoneCountMap().get(chunkKey);
                 int max = plugin.getConfig().getInt("redstone-limit", 128);
-                player.sendActionBar(color("&e该区块红石数量 " + count + " / " + max));
+                player.sendActionBar(Component.text("该区块红石数量 " + count + " / " + max, NamedTextColor.YELLOW));
             }
         }
     }
