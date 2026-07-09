@@ -43,6 +43,8 @@
                                 </relocation>
                             </relocations>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <finalName>ChunkHopper</finalName>
+                            <outputDirectory>/Users/rain/Desktop/Paper/plugins</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
